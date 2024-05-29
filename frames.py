@@ -30,7 +30,7 @@ for frame in frames:
 
 # Remember to remove the #
 encoder = {color: letter for color, letter in zip(colors, string.ascii_lowercase)}
-header = ";".join(colors)
+header = "-".join(colors)
 
 encoded = [
     [encoder[pixel] for pixel in frame]
@@ -38,11 +38,10 @@ encoded = [
 ]
 
 with open("output.txt", "w") as f:
-    # Scratch treats delimters as a CSV file if they are on the first line
-    f.write("\n") 
+    # Scratch treats semicolons and commas as CSV delimeters
     f.write(f"{header}\n")
     for frame in encoded:
-        f.write(f"{';'.join(frame)}\n")
+        f.write(f"{''.join(frame)}\n")
     #for pixel in [x[1:] for xs in frames for x in xs]: # skip the # because it isn't needed in scratch
     #    f.write(f"{pixel}\n")
 

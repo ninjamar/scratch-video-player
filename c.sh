@@ -1,6 +1,7 @@
 # I got rickroll.gif from the internet, then I trimmed the length
 convert rickroll.gif -coalesce small.gif
 convert -size 320x240 small.gif -resize 40x30 small.gif
+
 # This converts the each of the gif's frame to a pallete, but it isn't unified across all frames
 # convert small.gif -colors 26 small.gif
 
