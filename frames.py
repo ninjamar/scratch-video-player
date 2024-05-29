@@ -17,8 +17,8 @@ with Image.open('small.gif') as im:
 
 frames = [[
     rgba_to_hex(frame[i, j])
-    for i in range(24)
-    for j in range(32)
+    for i in range(24) # Height
+    for j in range(32) # Width
 ] for frame in frames]
 
 with open("output.txt", "w") as f:
