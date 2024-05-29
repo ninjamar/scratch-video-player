@@ -20,8 +20,8 @@ with Image.open('small.gif') as im:
 
 frames = [[
     rgb_to_hex(frame[i, j])
-    for i in range(30) # Height
-    for j in range(40) # Width
+    for i in range(60) # Height
+    for j in range(80) # Width
 ] for frame in frames]
 
 colors = set()
