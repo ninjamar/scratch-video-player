@@ -1,7 +1,12 @@
 from PIL import Image, ImageSequence
 import numpy as np
 import string
+import sys
 
+WIDTH, HEIGHT = sys.argv[1].split("x")
+
+WIDTH = int(WIDTH)
+HEIGHT = int(HEIGHT)
 
 def rgb_to_hex(rgba):
     # I have removed the hashtag for compatibility
@@ -17,11 +22,12 @@ def load_frames(image: Image, mode='RGBA'):
 with Image.open('small.gif') as im:
     frames = load_frames(im)
 
+TOTAL_LENGTH = len(frames)
 
 frames = [[
     rgb_to_hex(frame[i, j])
-    for i in range(60) # Height
-    for j in range(80) # Width
+    for i in range(HEIGHT) # Height
+    for j in range(WIDTH) # Width
 ] for frame in frames]
 
 colors = set()
@@ -39,6 +45,8 @@ encoded = [
 
 with open("output.txt", "w") as f:
     # Scratch treats semicolons and commas as CSV delimeters
+    f.write(f"{TOTAL_LENGTH}\n")
+    f.write(f"{WIDTH}x{HEIGHT}\n")
     f.write(f"{header}\n")
     for frame in encoded:
         f.write(f"{''.join(frame)}\n")
