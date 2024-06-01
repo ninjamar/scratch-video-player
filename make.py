@@ -4,9 +4,9 @@ import string
 import sys
 
 WIDTH, HEIGHT = sys.argv[1].split("x")
-
 WIDTH = int(WIDTH)
 HEIGHT = int(HEIGHT)
+CHARS = string.ascii_lowercase + string.digits
 
 def rgb_to_hex(rgba):
     # I have removed the hashtag for compatibility
@@ -34,10 +34,15 @@ colors = set()
 for frame in frames:
     colors.update(frame)
 
-# Remember to remove the #
-encoder = {color: letter for color, letter in zip(colors, string.ascii_lowercase)}
-header = "-".join(colors)
+colors = sorted(colors)
 
+if len(colors) > len(CHARS):
+    raise Exception(f"The GIF needs less than ${len(CHARS)} colors")
+
+# Remember to remove the #
+encoder = {color: letter for color, letter in zip(colors, CHARS)}
+
+header = "-".join(colors)
 encoded = [
     [encoder[pixel] for pixel in frame]
     for frame in frames
