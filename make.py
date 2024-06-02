@@ -1,12 +1,11 @@
 from PIL import Image, ImageSequence
 import numpy as np
-import string
 import sys
 
 WIDTH, HEIGHT = sys.argv[1].split("x")
 WIDTH = int(WIDTH)
 HEIGHT = int(HEIGHT)
-CHARS = string.ascii_lowercase + string.digits
+CHARS = """abcdefghijklmnopqrstuvwxyz0123456789!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~"""
 
 def rgb_to_hex(rgba):
     # I have removed the hashtag for compatibility
@@ -35,9 +34,8 @@ for frame in frames:
     colors.update(frame)
 
 colors = sorted(colors)
-
 if len(colors) > len(CHARS):
-    raise Exception(f"The GIF needs less than ${len(CHARS)} colors")
+    raise Exception(f"The GIF needs less than {len(CHARS)} colors")
 
 # Remember to remove the #
 encoder = {color: letter for color, letter in zip(colors, CHARS)}
