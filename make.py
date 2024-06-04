@@ -18,6 +18,25 @@ def load_frames(image: Image, mode='RGBA'):
         for frame in ImageSequence.Iterator(image)
     ])
 
+def compress(data):
+    result = []
+    for frame in data:
+        current_char = frame[0]
+        total = 0
+        new = ""
+        for char in frame[1:]: # current-char is already frame[0]
+            if char == current_char:
+                total += 1
+            else:
+                if total - 1 > 1:
+                    new = new + current_char + str(total - 1) # we have already current char is already added (part of total)
+                else:
+                    new = new + current_char
+                total = 0
+                current_char = char
+        result.append(new)
+    return result
+
 with Image.open('small.gif') as im:
     frames = load_frames(im)
 
@@ -38,21 +57,24 @@ if len(colors) > len(CHARS):
     raise Exception(f"The GIF needs less than {len(CHARS)} colors")
 
 # Remember to remove the #
-encoder = {color: letter for color, letter in zip(colors, CHARS)}
+colorLookup = {color: letter for color, letter in zip(colors, CHARS)}
 
 header = "-".join(colors)
-encoded = [
-    [encoder[pixel] for pixel in frame]
+colorEncoded = [
+    [colorLookup[pixel] for pixel in frame]
     for frame in frames
 ]
+
+compressed = compress(colorEncoded)
 
 with open("output.txt", "w") as f:
     # Scratch treats semicolons and commas as CSV delimeters
     f.write(f"{TOTAL_LENGTH}\n")
     f.write(f"{WIDTH}x{HEIGHT}\n")
     f.write(f"{header}\n")
-    for frame in encoded:
+    for frame in compressed:
         f.write(f"{''.join(frame)}\n")
+    # TODO: Remove last newline of file since it might mess stuff up in scratch
     #for pixel in [x[1:] for xs in frames for x in xs]: # skip the # because it isn't needed in scratch
     #    f.write(f"{pixel}\n")
 
