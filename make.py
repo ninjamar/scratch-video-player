@@ -28,8 +28,8 @@ def compress(data):
             if char == current_char:
                 total += 1
             else:
-                if total - 1 > 1:
-                    new = new + current_char + str(total - 1) # we have already current char is already added (part of total)
+                if total > 0:
+                    new = new + current_char + str(total) # we have already current char is already added (part of total)
                 else:
                     new = new + current_char
                 total = 0
