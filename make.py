@@ -5,7 +5,7 @@ import sys
 WIDTH, HEIGHT = sys.argv[1].split("x")
 WIDTH = int(WIDTH)
 HEIGHT = int(HEIGHT)
-CHARS = """abcdefghijklmnopqrstuvwxyz!"#$%&\'()*"""
+CHARS = """abcdefghijklmnopqrstuvwxyz!"#$%&'()*"""
 
 def rgb_to_hex(rgba):
     # I have removed the hashtag for compatibility
