@@ -2,9 +2,6 @@ from PIL import Image, ImageSequence
 import numpy as np
 import sys
 
-WIDTH, HEIGHT = sys.argv[1].split("x")
-WIDTH = int(WIDTH)
-HEIGHT = int(HEIGHT)
 CHARS = """abcdefghijklmnopqrstuvwxyz!"#$%&'()*"""
 
 def rgb_to_hex(rgba):
@@ -38,45 +35,54 @@ def compress(data):
         result.append(new)
     return result
 
-with Image.open('small.gif') as im:
-    frames = load_frames(im)
+def make(fpath, width, height):
+    with Image.open(fpath) as im:
+        frames = load_frames(im)
 
-TOTAL_LENGTH = len(frames)
+    total_length = len(frames)
 
-frames = [[
-    rgb_to_hex(frame[i, j])
-    for i in range(HEIGHT) # Height
-    for j in range(WIDTH) # Width
-] for frame in frames]
+    frames = [[
+        rgb_to_hex(frame[i, j])
+        for i in range(height) # Height
+        for j in range(width) # Width
+    ] for frame in frames]
 
-colors = set()
-for frame in frames:
-    colors.update(frame)
+    colors = set()
+    for frame in frames:
+        colors.update(frame)
 
-colors = sorted(colors)
-if len(colors) > len(CHARS):
-    raise Exception(f"The GIF needs less than {len(CHARS)} colors")
+    colors = sorted(colors)
+    if len(colors) > len(CHARS):
+        raise Exception(f"The GIF needs less than {len(CHARS)} colors")
 
-# Remember to remove the #
-colorLookup = {color: letter for color, letter in zip(colors, CHARS)}
+    # Remember to remove the #
+    colorLookup = {color: letter for color, letter in zip(colors, CHARS)}
 
-header = "-".join(colors)
-colorEncoded = [
-    [colorLookup[pixel] for pixel in frame]
-    for frame in frames
-]
+    header = "-".join(colors)
+    colorEncoded = [
+        [colorLookup[pixel] for pixel in frame]
+        for frame in frames
+    ]
 
-compressed = compress(colorEncoded)
+    compressed = compress(colorEncoded)
 
-with open("output.txt", "w") as f:
-    # Scratch treats semicolons and commas as CSV delimeters
-    f.write(f"{TOTAL_LENGTH}\n")
-    f.write(f"{WIDTH}x{HEIGHT}\n")
-    f.write(f"{header}\n")
-    for frame in compressed:
-        f.write(f"{''.join(frame)}\n")
-    # TODO: Remove last newline of file since it might mess stuff up in scratch
-    #for pixel in [x[1:] for xs in frames for x in xs]: # skip the # because it isn't needed in scratch
-    #    f.write(f"{pixel}\n")
+    with open("output.txt", "w") as f:
+        # Scratch treats semicolons and commas as CSV delimeters
+        f.write(f"{total_length}\n")
+        f.write(f"{width}x{height}\n")
+        f.write(f"{header}\n")
+        for frame in compressed:
+            f.write(f"{''.join(frame)}\n")
+        # TODO: Remove last newline of file since it might mess stuff up in scratch
+        #for pixel in [x[1:] for xs in frames for x in xs]: # skip the # because it isn't needed in scratch
+        #    f.write(f"{pixel}\n")
 
-    # frames * width * height
+        # frames * width * height
+
+if __name__ == "__main__":
+    FPATH = sys.argv[1]
+    WIDTH, HEIGHT = sys.argv[2].split("x")
+    WIDTH = int(WIDTH)
+    HEIGHT = int(HEIGHT)
+
+    make(FPATH, WIDTH, HEIGHT)
