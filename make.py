@@ -57,8 +57,6 @@ def make(fpath, width, height):
 
     # Remember to remove the #
     colorLookup = {color: letter for color, letter in zip(colors, CHARS)}
-
-    header = "-".join(colors)
     colorEncoded = [
         [colorLookup[pixel] for pixel in frame]
         for frame in frames
@@ -68,9 +66,10 @@ def make(fpath, width, height):
 
     with open("output.txt", "w") as f:
         # Scratch treats semicolons and commas as CSV delimeters
-        f.write(f"{total_length}\n")
         f.write(f"{width}x{height}\n")
-        f.write(f"{header}\n")
+        f.write(f"{CHARS}\n")
+        f.write(f"{'-'.join(colors)}\n") # colors
+        # 3 lines for headers
         for frame in compressed:
             f.write(f"{''.join(frame)}\n")
         # TODO: Remove last newline of file since it might mess stuff up in scratch
