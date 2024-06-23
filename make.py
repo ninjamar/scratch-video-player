@@ -35,7 +35,7 @@ def compress(data):
         result.append(new)
     return result
 
-def make(fpath, width, height):
+def make(fpath, width, height, output_path):
     with Image.open(fpath) as im:
         frames = load_frames(im)
 
@@ -64,7 +64,7 @@ def make(fpath, width, height):
 
     compressed = compress(colorEncoded)
 
-    with open("output.txt", "w") as f:
+    with open(output_path, "w") as f:
         # Scratch treats semicolons and commas as CSV delimeters
         f.write(f"{width}x{height}\n")
         f.write(f"{CHARS}\n")
@@ -81,7 +81,9 @@ def make(fpath, width, height):
 if __name__ == "__main__":
     FPATH = sys.argv[1]
     WIDTH, HEIGHT = sys.argv[2].split("x")
+    OUTPUT_PATH = sys.argv[3]
+
     WIDTH = int(WIDTH)
     HEIGHT = int(HEIGHT)
 
-    make(FPATH, WIDTH, HEIGHT)
+    make(FPATH, WIDTH, HEIGHT, OUTPUT_PATH)

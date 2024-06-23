@@ -4,4 +4,18 @@ These are some scripts I used to generate the data from my [scratch video player
 
 
 # Usage
-First get a gif, then follow the directions in `conv.sh`. After running `conv.sh`, run `python3 make.py small.gif WIDTHxHEIGHT` replacing `WIDTH` and `HEIGHT` appropriately. Upload the file `output.txt` to the list `data` in the scratch video player. 
+Get a gif
+```bash
+bash conv.sh input.gif inputDimensions output.gif outputDimensions
+python3 make.py output.gif WIDTHxHEIGHT output.txt
+
+```
+### Example
+
+```bash
+bash conv.sh rickroll.gif 1280x720 small.gif 96x54
+python3 make.py small.gif 96x54 rickroll.txt
+
+```
+
+Upload the generated txt file to the list `data` in the [scratch video player](https://scratch.mit.edu/projects/602626065/). Apparently scratch stores lists twice in the project.json, so the generated text file has to be less than 2.5 mb.
