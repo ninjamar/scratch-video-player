@@ -6,8 +6,8 @@ These are some scripts I used to generate the data from my [scratch video player
 # Usage
 Get a gif
 ```bash
-bash conv.sh input.gif inputDimensions output.gif outputDimensions
-python3 make.py output.gif WIDTHxHEIGHT output.txt
+bash conv.sh input.gif inputDimensions generated.gif outputDimensions
+python3 make.py generated.gif WIDTHxHEIGHT output.txt
 
 ```
 ### Example

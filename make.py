@@ -1,4 +1,4 @@
-# Usage: python3 make.py output.gif WIDTHxHEIGHT output.txt
+# Usage: python3 make.py input.gif WIDTHxHEIGHT output.txt
 
 from PIL import Image, ImageSequence
 import numpy as np
@@ -16,9 +16,8 @@ def load_frames(image: Image, mode="RGBA"):
         [np.array(frame.convert(mode)) for frame in ImageSequence.Iterator(image)]
     )
 
-def rle_compress(data):
-    # result = []
-    # for frame in data:
+def rle(data):
+    # Row length encoding
     current_char = data[0]
     total = 0
     new = ""
@@ -35,8 +34,9 @@ def rle_compress(data):
                 new = new + current_char
             total = 0
             current_char = char
+    return new
 
-def mk_color_map(frames, height, width):
+def mk_color_map(frames, width, height):
     frames = [
         [
             rgb_to_hex(frame[i, j])
@@ -60,12 +60,16 @@ def mk_color_map(frames, height, width):
 
     return colors, colorEncoded
 
+def compress(frames, width, height):
+    colors, frames = mk_color_map(frames, width, height)
+    frames = [rle(frame) for frame in frames]
+    return colors, frames
 
 def make(fpath, width, height, output_path):
     with Image.open(fpath) as im:
         frames = load_frames(im)
 
-    colors, compressed = mk_color_map(frames, width, height)
+    colors, frames = compress(frames, width, height)
 
     with open(output_path, "w") as f:
         # Scratch treats semicolons and commas as CSV delimeters
@@ -73,7 +77,7 @@ def make(fpath, width, height, output_path):
         f.write(f"{CHARS}\n")
         f.write(f"{'-'.join(colors)}\n")  # colors
         # 3 lines for headers
-        for frame in "".join([rle_compress(frame) for frame in compressed]):
+        for frame in frames:
             f.write(f"{''.join(frame)}\n")
 
 
