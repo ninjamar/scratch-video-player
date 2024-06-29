@@ -1,3 +1,5 @@
+# Usage: python3 make.py output.gif WIDTHxHEIGHT output.txt
+
 from PIL import Image, ImageSequence
 import numpy as np
 import sys
@@ -15,31 +17,27 @@ def load_frames(image: Image, mode='RGBA'):
         for frame in ImageSequence.Iterator(image)
     ])
 
-def compress(data):
-    result = []
-    for frame in data:
-        current_char = frame[0]
-        total = 0
-        new = ""
-        for char in frame[1:]: # current-char is already frame[0]
-            if char == current_char:
-                total += 1
+def rle_compress(data):
+    #result = []
+    #for frame in data:
+    current_char = data[0]
+    total = 0
+    new = ""
+    for char in data[1:]: # current_char is already data[0]
+        if char == current_char:
+            total += 1
+        else:
+            # TODO: If total = 1, then add current char twice (doesn't save any characters by encoding)
+            if total > 0:
+                new = new + current_char + str(total) # we have already current char is already added (part of total)
             else:
-                # TODO: If totoal = 1, then add current char twice (doesn't save any characters by encoding)
-                if total > 0:
-                    new = new + current_char + str(total) # we have already current char is already added (part of total)
-                else:
-                    new = new + current_char
-                total = 0
-                current_char = char
-        result.append(new)
-    return result
+                new = new + current_char
+            total = 0
+            current_char = char
 
 def make(fpath, width, height, output_path):
     with Image.open(fpath) as im:
         frames = load_frames(im)
-
-    total_length = len(frames)
 
     frames = [[
         rgb_to_hex(frame[i, j])
@@ -62,21 +60,14 @@ def make(fpath, width, height, output_path):
         for frame in frames
     ]
 
-    compressed = compress(colorEncoded)
-
     with open(output_path, "w") as f:
         # Scratch treats semicolons and commas as CSV delimeters
         f.write(f"{width}x{height}\n")
         f.write(f"{CHARS}\n")
         f.write(f"{'-'.join(colors)}\n") # colors
         # 3 lines for headers
-        for frame in compressed:
+        for frame in "".join([rle_compress(frame) for frame in colorEncoded]):
             f.write(f"{''.join(frame)}\n")
-        # TODO: Remove last newline of file since it might mess stuff up in scratch
-        #for pixel in [x[1:] for xs in frames for x in xs]: # skip the # because it isn't needed in scratch
-        #    f.write(f"{pixel}\n")
-
-        # frames * width * height
 
 if __name__ == "__main__":
     FPATH = sys.argv[1]
