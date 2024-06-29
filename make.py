@@ -28,35 +28,35 @@ def delta_like(data):
         curr_frame = data[i]
         prev_frame = data[i - 1]
 
+        range_start = 0
         range_end = 0
         is_in_range = False
         temp = []
-
-        for index, (curr_char, prev_char) in enumerate(zip(curr_frame, prev_frame)):
-            if curr_char == prev_char:
-                if not is_in_range:
-                    range_start = index
-                    is_in_range = True
-            else:
-                if is_in_range:
-                    range_end = index - 1
-                    is_in_range = False
-
-                    # Python indexed
-                    f = fmt(range_start, range_end)
-                    if (range_end - range_start) > len(f):
-                        temp.append(f)
-                    else:
-                        temp.append(curr_frame[range_start:range_end])
+        # Same range
+        if curr_frame == prev_frame:
+            temp.append(fmt(0, len(curr_frame)))
+        else:
+            # Check every character
+            for index, (curr_char, prev_char) in enumerate(zip(curr_frame, prev_frame)):
+                if curr_char == prev_char:
+                    if not is_in_range:
+                        range_start = index
+                        is_in_range = True
                 else:
-                    temp.append(curr_char)
-        # Only thing I can think of
-        if len(temp) == 0:
-            if len(curr_frame) != len(prev_frame):
-                raise Exception("shouldn't happen")
-            temp.append(fmt(0, len(prev_frame)))
+                    if is_in_range:
+                        range_end = index - 1
+                        is_in_range = False
 
+                        # Python indexed
+                        f = fmt(range_start, range_end)
+                        if (range_end - range_start) > len(f):
+                            temp.append(f)
+                        else:
+                            temp.append(curr_frame[range_start:range_end])
+                    else:
+                        temp.append(curr_char)
         composed.append("".join(temp))
+
         i += 1
     return composed
 
