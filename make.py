@@ -1,10 +1,11 @@
 # Usage: python3 make.py input.gif WIDTHxHEIGHT output.txt
+# TODO: Figure out how to use stack for scratch custom blocks
 
 from PIL import Image, ImageSequence
 import numpy as np
 import sys
 
-CHARS = """abcdefghijklmnopqrstuvwxyz!"#$%&'()*"""
+CHARS = """abcdefghijklmnopqrstuvwxyz!@#$%&^()*"""
 
 
 def rgb_to_hex(rgba):
@@ -20,8 +21,8 @@ def load_frames(image: Image, mode="RGBA"):
 
 
 def delta_like(data):
-    composed = []
-    fmt = lambda start, end: "[{0}-{1}]".format(start, end)
+    composed = [data[0]]
+    fmt = lambda start, end: "[{0}-{1}]".format(start + 1, end + 1)
     # Each item
     i = 1
     while i < len(data):
@@ -34,7 +35,7 @@ def delta_like(data):
         temp = []
         # Same range
         if curr_frame == prev_frame:
-            temp.append(fmt(0, len(curr_frame)))
+            temp.append(fmt(0, len(curr_frame) -  1))
         else:
             # Check every character
             for index, (curr_char, prev_char) in enumerate(zip(curr_frame, prev_frame)):
@@ -44,7 +45,7 @@ def delta_like(data):
                         is_in_range = True
                 else:
                     if is_in_range:
-                        range_end = index - 1
+                        range_end = index
                         is_in_range = False
 
                         # Python indexed
@@ -52,7 +53,7 @@ def delta_like(data):
                         if (range_end - range_start) > len(f):
                             temp.append(f)
                         else:
-                            temp.append(curr_frame[range_start:range_end])
+                            temp.append(curr_frame[range_start: range_end]) # list[inclusive:exclusive]
                     else:
                         temp.append(curr_char)
         composed.append("".join(temp))
@@ -79,6 +80,7 @@ def rle(data):
                 new = new + current_char
             total = 0
             current_char = char
+    new = new + current_char + str(total)
     return new
 
 
