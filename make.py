@@ -112,7 +112,7 @@ def mk_color_map(frames, width, height):
 def compress(frames, width, height):
     colors, frames = mk_color_map(frames, width, height)
     frames = [rle(frame) for frame in frames]
-    frames = delta_like(frames)
+    # frames = delta_like(frames)
     return colors, frames
 
 

@@ -2,3 +2,4 @@ frame_*.png
 palette.png
 .DS_store
 msg.txt
+__pycache__
