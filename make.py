@@ -2,6 +2,7 @@
 # TODO: Figure out how to use stack for scratch custom blocks
 
 from PIL import Image, ImageSequence
+from collections import Counter
 import numpy as np
 import sys
 
@@ -18,6 +19,46 @@ def load_frames(image: Image, mode="RGBA"):
     return np.array(
         [np.array(frame.convert(mode)) for frame in ImageSequence.Iterator(image)]
     )
+
+def find_pattern(strings, pattern_length, _min = 4):
+    counter = Counter()
+    for s in strings:
+        # All substrings for patttern length
+        for i in range(len(s) - pattern_length + 1):
+            pattern = s[i:i + pattern_length]
+            counter[pattern] += 1
+        return {pattern: freq for pattern, freq in counter.items() if freq >= _min}
+
+def find_all_patterns(strings, _min = 3):
+    patterns = {}
+
+    for i in range(3, 100):
+        patterns.update(find_pattern(strings, i, _min = _min))
+    t = {k: v for k,v in sorted(patterns.items(), key = lambda x: x[1])}
+    # print(t)
+    return t
+
+def pattern_replace(frames):
+
+    fmt = lambda _id: "{" + str(_id) + "}"
+
+    patterns = find_all_patterns(frames)
+    
+    used = {}
+
+    _id = 0
+    for pattern, freq in patterns.items():
+        if "abx" in pattern:
+            print(pattern)
+        if any(pattern in frame for frame in frames):
+            size_taken = len(pattern * freq)
+            size_new = len(fmt(_id) * freq) + len(pattern + "-")
+            if size_new < size_taken:
+                frames = [frame.replace(pattern, fmt(_id)) for frame in frames]
+                used[pattern] = _id
+                _id += 1
+
+    return frames, used
 
 def rle(data):
     # Row length encoding
@@ -63,28 +104,30 @@ def mk_color_map(frames, width, height):
     colorLookup = {color: letter for color, letter in zip(colors, CHARS)}
     colorEncoded = [[colorLookup[pixel] for pixel in frame] for frame in frames]
 
-    return colors, colorEncoded
+    return colorEncoded, colors
 
 
 def compress(frames, width, height):
-    colors, frames = mk_color_map(frames, width, height)
+    frames, colors = mk_color_map(frames, width, height)
     frames = [rle(frame) for frame in frames]
-    return colors, frames
+    frames, used = pattern_replace(frames)
+    return frames, colors, used
 
 
 def make(fpath, width, height, output_path):
     with Image.open(fpath) as im:
         frames = load_frames(im)
 
-    colors, compressed = compress(frames, width, height)
+    frames, colors, replaced_dict = compress(frames, width, height)
 
     with open(output_path, "w") as f:
         # Scratch treats semicolons and commas as CSV delimeters
         f.write(f"{width}x{height}\n")
         f.write(f"{CHARS}\n")
+        f.write(f"{'-'.join(replaced_dict)}\n")  # colors
         f.write(f"{'-'.join(colors)}\n")  # colors
         # 3 lines for headers
-        for frame in compressed:
+        for frame in frames:
             f.write(f"{frame}\n")
 
 
