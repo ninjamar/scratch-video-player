@@ -19,49 +19,6 @@ def load_frames(image: Image, mode="RGBA"):
         [np.array(frame.convert(mode)) for frame in ImageSequence.Iterator(image)]
     )
 
-
-def delta_like(data):
-    composed = [data[0]]
-    fmt = lambda start, end: "[{0}-{1}]".format(start + 1, end + 1)
-    # Each item
-    i = 1
-    while i < len(data):
-        curr_frame = data[i]
-        prev_frame = data[i - 1]
-
-        range_start = 0
-        range_end = 0
-        is_in_range = False
-        temp = []
-        # Same range
-        if curr_frame == prev_frame:
-            temp.append(fmt(0, len(curr_frame) -  1))
-        else:
-            # Check every character
-            for index, (curr_char, prev_char) in enumerate(zip(curr_frame, prev_frame)):
-                if curr_char == prev_char:
-                    if not is_in_range:
-                        range_start = index
-                        is_in_range = True
-                else:
-                    if is_in_range:
-                        range_end = index
-                        is_in_range = False
-
-                        # Python indexed
-                        f = fmt(range_start, range_end)
-                        if (range_end - range_start) > len(f):
-                            temp.append(f)
-                        else:
-                            temp.append(curr_frame[range_start: range_end]) # list[inclusive:exclusive]
-                    else:
-                        temp.append(curr_char)
-        composed.append("".join(temp))
-
-        i += 1
-    return composed
-
-
 def rle(data):
     # Row length encoding
     current_char = data[0]
@@ -112,7 +69,6 @@ def mk_color_map(frames, width, height):
 def compress(frames, width, height):
     colors, frames = mk_color_map(frames, width, height)
     frames = [rle(frame) for frame in frames]
-    # frames = delta_like(frames)
     return colors, frames
 
 
