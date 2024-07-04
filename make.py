@@ -2,11 +2,17 @@
 # TODO: Figure out how to use stack for scratch custom blocks
 
 from PIL import Image, ImageSequence
-from collections import Counter
+from lzw import lzw_encode, lzw_decode
+import json
 import numpy as np
 import sys
 
+with open("codepoints.json") as f:
+    CODEPOINTS = json.load(f)
+
 CHARS = """abcdefghijklmnopqrstuvwxyz!@#$%&^()*"""
+LZW_ENCODE_DICTIONARY = {x: i for i, x in enumerate(CHARS + "1234567890|")}
+LZW_DECODE_DICTIONARY = {i: x for x, i in LZW_ENCODE_DICTIONARY.items()}
 
 
 def rgb_to_hex(rgba):
@@ -19,6 +25,7 @@ def load_frames(image: Image, mode="RGBA"):
     return np.array(
         [np.array(frame.convert(mode)) for frame in ImageSequence.Iterator(image)]
     )
+
 
 def rle(data):
     # Row length encoding
@@ -66,27 +73,34 @@ def mk_color_map(frames, width, height):
 
     return colorEncoded, colors
 
+def lzw_prepare(frames):
+    frames = "|".join(frames)
+    codes = lzw_encode(frames, dictionary=LZW_ENCODE_DICTIONARY, max_dict_size=len(CODEPOINTS))
+    codes = [CODEPOINTS[code] for code in codes]
+    return "".join(codes)
 
 def compress(frames, width, height):
     frames, colors = mk_color_map(frames, width, height)
     frames = [rle(frame) for frame in frames]
-    return frames, colors
+    codes = lzw_prepare(frames)
+    return codes, colors
 
 
 def make(fpath, width, height, output_path):
     with Image.open(fpath) as im:
         frames = load_frames(im)
 
-    frames, colors = compress(frames, width, height)
+    codes, colors = compress(frames, width, height)
 
     with open(output_path, "w") as f:
         # Scratch treats semicolons and commas as CSV delimeters
         f.write(f"{width}x{height}\n")
         f.write(f"{CHARS}\n")
         f.write(f"{'-'.join(colors)}\n")  # colors
+        f.write(codes)
         # 3 lines for headers
-        for frame in frames:
-            f.write(f"{frame}\n")
+        #for frame in frames:
+        #    f.write(f"{frame}\n")
 
 
 if __name__ == "__main__":
